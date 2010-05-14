@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               Rose-DBx-Object-MoreHelpers
-version:            0.07
+version:            0.08
 abstract:           more mixin helpers for RDBO
 author:
     - Peter Karman <karman@cpan.org>
