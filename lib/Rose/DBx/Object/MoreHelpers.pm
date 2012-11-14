@@ -36,14 +36,14 @@ Rose::DB::Object::Metadata::Relationship::ManyToMany
 
 use Rose::Class::MakeMethods::Generic ( scalar => ['debug'], );
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 __PACKAGE__->export_tags(
     all => [
         qw(
             primary_key_uri_escaped primary_key_value
             flatten exists has_related has_related_pages
-            fetch_all fetch_all_iterator
+            fetch_all fetch_all_iterator fetch_count
             )
     ],
 
@@ -52,7 +52,7 @@ __PACKAGE__->export_tags(
         qw(
             primary_key_uri_escaped primary_key_value
             flatten exists has_related has_related_pages
-            fetch_all fetch_all_iterator
+            fetch_all fetch_all_iterator fetch_count
             )
     ],
 );
@@ -130,9 +130,16 @@ value will be an array ref of values.
 
 sub primary_key_value {
     my $self = shift;
-    my @cols = $self->meta->primary_key_column_names;
+    my @cols = $self->meta->primary_key_columns;
     my @vals;
-    for my $m (@cols) {
+    for my $col (@cols) {
+        my $m;
+        if ( ref $col ) {
+            $m = $col->alias || $col->name;
+        }
+        else {
+            $m = $col;
+        }
         push( @vals, scalar $self->$m );
     }
     return scalar(@vals) > 1 ? \@vals : $vals[0];
@@ -320,6 +327,21 @@ sub fetch_all_iterator {
     my $self  = shift;
     my $class = $self->meta->class;
     return Rose::DB::Object::Manager->get_objects_iterator(
+        object_class => $class,
+        @_
+    );
+}
+
+=head2 fetch_count
+
+Shortcut for the Manager method get_objects_count().
+
+=cut
+
+sub fetch_count {
+    my $self  = shift;
+    my $class = $self->meta->class;
+    return Rose::DB::Object::Manager->get_objects_count(
         object_class => $class,
         @_
     );
